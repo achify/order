@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-
+	"order/internal/auth"
 	ord "order/internal/order"
 	"order/internal/router"
 )
@@ -18,7 +18,7 @@ func main() {
 	_ = godotenv.Load()
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
-		dsn = "postgres://postgres:postgres@localhost:5432/order?sslmode=disable"
+		log.Fatal("DB_DSN env not set")
 	}
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
@@ -28,7 +28,8 @@ func main() {
 	repo := ord.NewPostgresRepository(db)
 	svc := ord.NewService(repo)
 	ctrl := ord.NewController(svc)
-
+	authSvc := auth.NewService(secret)
+	authCtrl := auth.NewController(authSvc)
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
 		secret = []byte("secret")
@@ -41,7 +42,7 @@ func main() {
 	}
 	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
-	r := router.New(ctrl, secret)
-	log.Println("server listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	r := router.New(ctrl, secret, authCtrl)
+	log.Println("server listening on :8089")
+	log.Fatal(http.ListenAndServe(":8089", r))
 }
