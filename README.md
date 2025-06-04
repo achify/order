@@ -15,16 +15,16 @@ Start Postgres:
 docker-compose up -d
 ```
 
-Run database migration:
+Run database migration (use `pgcli` if `psql` is not installed):
 
 ```bash
-psql -h localhost -U postgres -d order -f internal/order/migrations/001_create_orders.sql
+pgcli postgresql://postgres:postgres@localhost:5552/order -f internal/order/migrations/001_create_orders.sql
 ```
 
 Configure environment variables in a `.env` file (example values shown):
 
 ```bash
-DB_DSN=postgres://postgres:postgres@localhost:5432/order?sslmode=disable
+DB_DSN=postgres://postgres:postgres@localhost:5552/order?sslmode=disable
 JWT_SECRET=secret
 ```
 

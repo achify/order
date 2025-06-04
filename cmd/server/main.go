@@ -18,7 +18,7 @@ func main() {
 	_ = godotenv.Load()
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
-		dsn = "postgres://postgres:postgres@localhost:5432/order?sslmode=disable"
+		dsn = "postgres://postgres:postgres@localhost:5552/order?sslmode=disable"
 	}
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
