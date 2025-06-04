@@ -28,12 +28,13 @@ func main() {
 	repo := ord.NewPostgresRepository(db)
 	svc := ord.NewService(repo)
 	ctrl := ord.NewController(svc)
-	authSvc := auth.NewService(secret)
-	authCtrl := auth.NewController(authSvc)
+
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
 		secret = []byte("secret")
 	}
+	authSvc := auth.NewService(secret)
+	authCtrl := auth.NewController(authSvc)
 
 	// log to file
 	f, err := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
