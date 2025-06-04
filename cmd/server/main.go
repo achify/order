@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
+	"order/internal/auth"
 	ord "order/internal/order"
 	"order/internal/router"
 )
@@ -25,14 +26,17 @@ func main() {
 		log.Fatalf("db connect: %v", err)
 	}
 
-	repo := ord.NewPostgresRepository(db)
-	svc := ord.NewService(repo)
-	ctrl := ord.NewController(svc)
-
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
 		secret = []byte("secret")
 	}
+
+	repo := ord.NewPostgresRepository(db)
+	svc := ord.NewService(repo)
+	ctrl := ord.NewController(svc)
+
+	authSvc := auth.NewService(secret)
+	authCtrl := auth.NewController(authSvc)
 
 	// log to file
 	f, err := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -41,7 +45,7 @@ func main() {
 	}
 	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
-	r := router.New(ctrl, secret)
+	r := router.New(ctrl, secret, authCtrl)
 	log.Println("server listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

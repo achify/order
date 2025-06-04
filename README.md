@@ -52,3 +52,31 @@ All endpoints require a valid JWT in the `Authorization: Bearer <token>` header.
 - `GET /metrics` – basic memory and RPS metrics
 
 Validation errors return HTTP `422`. Missing or invalid tokens return `401`. When an order isn't found `404` is used.
+
+### Authentication
+
+Obtain a JWT token using the static credentials `admin` / `password`:
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -d '{"username":"admin","password":"password"}' \
+  -H 'Content-Type: application/json'
+```
+
+The response contains `token` and `refresh_token` fields. Tokens expire after 30 minutes by default. Refresh an access token with:
+
+```bash
+curl -X POST http://localhost:8080/auth/refresh \
+  -d '{"refresh_token":"<refresh>"}' \
+  -H 'Content-Type: application/json'
+```
+
+### Example Order Request
+
+```bash
+# create order
+curl -X POST http://localhost:8080/orders \
+  -H "Authorization: Bearer <token>" \
+  -H 'Content-Type: application/json' \
+  -d '{"receiver_id":"r","account_id":"a","seller_id":"s","delivery_id":"d","basket_id":"b"}'
+```
