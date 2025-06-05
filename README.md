@@ -40,6 +40,22 @@ Logs are written to `server.log`. Tail them with:
 tail -f server.log
 ```
 
+### Delivery Service
+
+The repository also includes a delivery microservice responsible for tracking
+shipments and synchronizing parcel machine locations from Omniva. Run database
+migrations located in `internal/delivery/migrations` and start the service:
+
+```bash
+psql -h localhost -U postgres -d order -f internal/delivery/migrations/001_create_deliveries.sql
+go run ./cmd/delivery
+```
+
+Parcel machine data is fetched from `https://www.omniva.ee/locations.json` once a
+day automatically. Logs are written to `delivery.log`.
+
+API documentation is available in `docs/delivery-swagger.yaml`.
+
 ## API
 
 All endpoints require a valid JWT in the `Authorization: Bearer <token>` header.

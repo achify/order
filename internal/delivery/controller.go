@@ -1,4 +1,4 @@
-package order
+package delivery
 
 import (
 	"encoding/json"
@@ -8,8 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Controller exposes HTTP handlers
-
+// Controller exposes HTTP handlers for deliveries.
 type Controller struct {
 	Service  *Service
 	Validate *validator.Validate
@@ -20,16 +19,16 @@ func NewController(s *Service) *Controller {
 }
 
 func (c *Controller) RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/orders", c.listOrders).Methods("GET")
-	r.HandleFunc("/orders/{id}", c.getOrder).Methods("GET")
-	r.HandleFunc("/orders", c.createOrder).Methods("POST")
-	r.HandleFunc("/orders/{id}", c.patchOrder).Methods("PATCH")
-	r.HandleFunc("/orders/{id}", c.deleteOrder).Methods("DELETE")
+	r.HandleFunc("/deliveries", c.list).Methods("GET")
+	r.HandleFunc("/deliveries/{id}", c.get).Methods("GET")
+	r.HandleFunc("/deliveries", c.create).Methods("POST")
+	r.HandleFunc("/deliveries/{id}", c.update).Methods("PATCH")
+	r.HandleFunc("/deliveries/{id}", c.delete).Methods("DELETE")
+	r.HandleFunc("/locations/{provider}", c.locations).Methods("GET")
 }
 
-func (c *Controller) listOrders(w http.ResponseWriter, r *http.Request) {
-	deliveryID := r.URL.Query().Get("delivery_id")
-	list, err := c.Service.List(r.Context(), deliveryID)
+func (c *Controller) list(w http.ResponseWriter, r *http.Request) {
+	list, err := c.Service.List(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -37,22 +36,22 @@ func (c *Controller) listOrders(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, list)
 }
 
-func (c *Controller) getOrder(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) get(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	o, err := c.Service.Get(r.Context(), id)
+	d, err := c.Service.Get(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if o == nil {
+	if d == nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-	respondJSON(w, http.StatusOK, o)
+	respondJSON(w, http.StatusOK, d)
 }
 
-func (c *Controller) createOrder(w http.ResponseWriter, r *http.Request) {
-	var dto OrderCreateDTO
+func (c *Controller) create(w http.ResponseWriter, r *http.Request) {
+	var dto CreateDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -61,40 +60,50 @@ func (c *Controller) createOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	o, err := c.Service.Create(r.Context(), dto)
+	d, err := c.Service.Create(r.Context(), dto)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	respondJSON(w, http.StatusCreated, o)
+	respondJSON(w, http.StatusCreated, d)
 }
 
-func (c *Controller) patchOrder(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) update(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	var dto OrderUpdateDTO
+	var dto UpdateDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	o, err := c.Service.Update(r.Context(), id, dto)
+	d, err := c.Service.Update(r.Context(), id, dto)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if o == nil {
+	if d == nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-	respondJSON(w, http.StatusOK, o)
+	respondJSON(w, http.StatusOK, d)
 }
 
-func (c *Controller) deleteOrder(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) delete(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if err := c.Service.Delete(r.Context(), id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (c *Controller) locations(w http.ResponseWriter, r *http.Request) {
+	provider := mux.Vars(r)["provider"]
+	locs, err := c.Service.Repo.Locations(r.Context(), provider)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	respondJSON(w, http.StatusOK, locs)
 }
 
 func respondJSON(w http.ResponseWriter, status int, v interface{}) {
