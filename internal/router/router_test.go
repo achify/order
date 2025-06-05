@@ -23,7 +23,10 @@ func (m *mockRepo) GetByID(_ context.Context, id string) (*ord.Order, error) {
 	}
 	return nil, nil
 }
-func (m *mockRepo) List(context.Context) ([]ord.Order, error) { var list []ord.Order; return list, nil }
+func (m *mockRepo) List(context.Context, string) ([]ord.Order, error) {
+	var list []ord.Order
+	return list, nil
+}
 func (m *mockRepo) Update(context.Context, *ord.Order) error  { return nil }
 func (m *mockRepo) Delete(_ context.Context, id string) error { delete(m.store, id); return nil }
 
