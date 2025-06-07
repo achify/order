@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS orders (
     account_id CHAR(26) NOT NULL,
     seller_id CHAR(26) NOT NULL,
     delivery_id CHAR(26) NOT NULL,
-    basket_id CHAR(26) NOT NULL
+    basket_id CHAR(26) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'new'
 );

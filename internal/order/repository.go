@@ -21,8 +21,8 @@ type Repository interface {
 // PostgresRepository implements Repository using PostgreSQL
 
 const createQuery = `INSERT INTO orders
-    (id, created_at, updated_at, receiver_id, account_id, seller_id, delivery_id, basket_id)
-    VALUES (:id, :created_at, :updated_at, :receiver_id, :account_id, :seller_id, :delivery_id, :basket_id)`
+    (id, created_at, updated_at, receiver_id, account_id, seller_id, delivery_id, basket_id, status)
+    VALUES (:id, :created_at, :updated_at, :receiver_id, :account_id, :seller_id, :delivery_id, :basket_id, :status)`
 
 const getQuery = `SELECT * FROM orders WHERE id=$1`
 const listQuery = `SELECT * FROM orders`
@@ -33,7 +33,8 @@ const updateQuery = `UPDATE orders SET
     account_id=:account_id,
     seller_id=:seller_id,
     delivery_id=:delivery_id,
-    basket_id=:basket_id
+    basket_id=:basket_id,
+    status=:status
     WHERE id=:id`
 const deleteQuery = `DELETE FROM orders WHERE id=$1`
 
