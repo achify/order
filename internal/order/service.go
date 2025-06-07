@@ -16,6 +16,10 @@ type Service struct {
 func NewService(r Repository) *Service { return &Service{Repo: r} }
 
 func (s *Service) Create(ctx context.Context, dto OrderCreateDTO) (*Order, error) {
+	status := StatusNew
+	if dto.Status != "" {
+		status = OrderStatus(dto.Status)
+	}
 	o := &Order{
 		ID:         ulid.Make().String(),
 		CreatedAt:  time.Now(),
@@ -25,6 +29,7 @@ func (s *Service) Create(ctx context.Context, dto OrderCreateDTO) (*Order, error
 		SellerID:   dto.SellerID,
 		DeliveryID: dto.DeliveryID,
 		BasketID:   dto.BasketID,
+		Status:     status,
 	}
 	if err := s.Repo.Create(ctx, o); err != nil {
 		return nil, err
@@ -59,6 +64,9 @@ func (s *Service) Update(ctx context.Context, id string, dto OrderUpdateDTO) (*O
 	}
 	if dto.BasketID != nil {
 		o.BasketID = *dto.BasketID
+	}
+	if dto.Status != nil {
+		o.Status = OrderStatus(*dto.Status)
 	}
 	o.UpdatedAt = time.Now()
 	if err := s.Repo.Update(ctx, o); err != nil {

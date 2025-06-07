@@ -56,6 +56,17 @@ day automatically. Logs are written to `delivery.log`.
 
 API documentation is available in `docs/delivery-swagger.yaml`.
 
+### Payment Service
+
+Payments are recorded through a separate microservice. Run the migration and start the service:
+
+```bash
+psql -h localhost -U postgres -d order -f internal/payment/migrations/001_create_payments.sql
+go run ./cmd/payment
+```
+
+See `docs/payment.md` for more details. Successful payments automatically set the related order status to `paid` and logs are written to `payment.log`.
+
 ## API
 
 All endpoints require a valid JWT in the `Authorization: Bearer <token>` header.

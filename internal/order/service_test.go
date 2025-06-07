@@ -41,4 +41,7 @@ func TestServiceCreateAndGet(t *testing.T) {
 	if got.ID != o.ID {
 		t.Fatalf("want %s got %s", o.ID, got.ID)
 	}
+	if got.Status != StatusNew {
+		t.Fatalf("want status %s got %s", StatusNew, got.Status)
+	}
 }
