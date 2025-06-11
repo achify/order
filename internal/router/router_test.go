@@ -9,6 +9,7 @@ import (
 
 	"order/internal/auth"
 	ord "order/internal/order"
+	usr "order/internal/user"
 )
 
 // mockRepo is a simple in-memory Repository implementation for tests
@@ -30,6 +31,15 @@ func (m *mockRepo) List(context.Context, string) ([]ord.Order, error) {
 func (m *mockRepo) Update(context.Context, *ord.Order) error  { return nil }
 func (m *mockRepo) Delete(_ context.Context, id string) error { delete(m.store, id); return nil }
 
+// memUserRepo is a simple in-memory user repository.
+type memUserRepo struct{ user *usr.User }
+
+func (m *memUserRepo) Create(_ context.Context, u *usr.User) error { m.user = u; return nil }
+func (m *memUserRepo) GetByUsername(_ context.Context, _ string) (*usr.User, error) {
+	return m.user, nil
+}
+func (m *memUserRepo) Update(_ context.Context, _ *usr.User) error { return nil }
+
 func TestCreateOrderStatusCode(t *testing.T) {
 	repo := newMockRepo()
 	svc := ord.NewService(repo)
@@ -37,13 +47,18 @@ func TestCreateOrderStatusCode(t *testing.T) {
 
 	secret := []byte("secret")
 	authSvc := auth.NewService(secret)
-	authCtrl := auth.NewController(authSvc)
+	userRepo := &memUserRepo{}
+	userSvc := usr.NewService(userRepo)
+	// seed admin user
+	_, _ = userSvc.Create(context.Background(), usr.UserCreateDTO{Username: "admin", Password: "pass", Roles: []usr.Role{usr.RoleAdmin}})
+	authCtrl := auth.NewController(authSvc, userSvc)
+	userCtrl := usr.NewController(userSvc)
 
-	r := New(ctrl, secret, authCtrl)
+	r := New(ctrl, secret, authCtrl, userCtrl)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	token, _, err := authSvc.GenerateToken("admin")
+	token, _, err := authSvc.GenerateToken("admin", []string{string(usr.RoleAdmin)})
 	if err != nil {
 		t.Fatalf("token: %v", err)
 	}

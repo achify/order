@@ -19,6 +19,9 @@ Run database migration:
 
 ```bash
 psql -h localhost -U postgres -d order -f internal/order/migrations/001_create_orders.sql
+
+# create users table
+psql -h localhost -U postgres -d order -f internal/user/migrations/001_create_users.sql
 ```
 
 Configure environment variables in a `.env` file (example values shown):
@@ -82,11 +85,11 @@ Validation errors return HTTP `422`. Missing or invalid tokens return `401`. Whe
 
 ### Authentication
 
-Obtain a JWT token using the static credentials `admin` / `password`:
+Obtain a JWT token using credentials stored in the `users` table (create users via `/users`):
 
 ```bash
 curl -X POST http://localhost:8080/auth/login \
-  -d '{"username":"admin","password":"password"}' \
+  -d '{"username":"<user>","password":"<pass>"}' \
   -H 'Content-Type: application/json'
 ```
 
