@@ -24,19 +24,21 @@ func NewService(secret []byte) *Service {
 }
 
 // GenerateToken returns signed access and refresh JWT tokens for given subject.
-func (s *Service) GenerateToken(sub string) (string, string, error) {
+func (s *Service) GenerateToken(sub string, roles []string) (string, string, error) {
 	now := time.Now()
-	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Subject:   sub,
-		ExpiresAt: jwt.NewNumericDate(now.Add(s.AccessTokenTTL)),
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":   sub,
+		"roles": roles,
+		"exp":   now.Add(s.AccessTokenTTL).Unix(),
 	})
 	tokenStr, err := t.SignedString(s.Secret)
 	if err != nil {
 		return "", "", err
 	}
-	r := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Subject:   sub,
-		ExpiresAt: jwt.NewNumericDate(now.Add(s.RefreshTokenTTL)),
+	r := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":   sub,
+		"roles": roles,
+		"exp":   now.Add(s.RefreshTokenTTL).Unix(),
 	})
 	refreshStr, err := r.SignedString(s.Secret)
 	if err != nil {
@@ -58,5 +60,12 @@ func (s *Service) Refresh(refreshToken string) (string, string, error) {
 		return "", "", jwt.ErrTokenMalformed
 	}
 	sub, _ := claims["sub"].(string)
-	return s.GenerateToken(sub)
+	rolesIface, _ := claims["roles"].([]interface{})
+	roles := make([]string, 0, len(rolesIface))
+	for _, r := range rolesIface {
+		if s, ok := r.(string); ok {
+			roles = append(roles, s)
+		}
+	}
+	return s.GenerateToken(sub, roles)
 }
