@@ -8,11 +8,15 @@ import (
 	"testing"
 
 	"order/internal/auth"
+	"order/internal/basket"
+	"order/internal/item"
 	ord "order/internal/order"
 )
 
 // mockRepo is a simple in-memory Repository implementation for tests
 type mockRepo struct{ store map[string]*ord.Order }
+type itemRepo struct{}
+type basketRepo struct{}
 
 func newMockRepo() *mockRepo { return &mockRepo{store: make(map[string]*ord.Order)} }
 
@@ -27,16 +31,34 @@ func (m *mockRepo) List(context.Context) ([]ord.Order, error) { var list []ord.O
 func (m *mockRepo) Update(context.Context, *ord.Order) error  { return nil }
 func (m *mockRepo) Delete(_ context.Context, id string) error { delete(m.store, id); return nil }
 
+func (i *itemRepo) Create(context.Context, *item.Item) error            { return nil }
+func (i *itemRepo) GetByID(context.Context, string) (*item.Item, error) { return nil, nil }
+func (i *itemRepo) List(context.Context) ([]item.Item, error)           { return nil, nil }
+func (i *itemRepo) Update(context.Context, *item.Item) error            { return nil }
+func (i *itemRepo) Delete(context.Context, string) error                { return nil }
+
+func (b *basketRepo) Create(context.Context, *basket.Basket) error             { return nil }
+func (b *basketRepo) GetByID(context.Context, string) (*basket.Basket, error)  { return nil, nil }
+func (b *basketRepo) List(context.Context) ([]basket.Basket, error)            { return nil, nil }
+func (b *basketRepo) Update(context.Context, *basket.Basket) error             { return nil }
+func (b *basketRepo) Delete(context.Context, string) error                     { return nil }
+func (b *basketRepo) AddItem(context.Context, *basket.Item) error              { return nil }
+func (b *basketRepo) UpdateItem(context.Context, *basket.Item) error           { return nil }
+func (b *basketRepo) DeleteItem(context.Context, string, string) error         { return nil }
+func (b *basketRepo) ListItems(context.Context, string) ([]basket.Item, error) { return nil, nil }
+
 func TestCreateOrderStatusCode(t *testing.T) {
 	repo := newMockRepo()
 	svc := ord.NewService(repo)
 	ctrl := ord.NewController(svc)
+	itemCtrl := item.NewController(item.NewService(&itemRepo{}))
+	basketCtrl := basket.NewController(basket.NewService(&basketRepo{}))
 
 	secret := []byte("secret")
 	authSvc := auth.NewService(secret)
 	authCtrl := auth.NewController(authSvc)
 
-	r := New(ctrl, secret, authCtrl)
+	r := New(ctrl, itemCtrl, basketCtrl, secret, authCtrl)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 

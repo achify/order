@@ -10,6 +10,8 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"order/internal/auth"
+	"order/internal/basket"
+	"order/internal/item"
 	ord "order/internal/order"
 	"order/internal/router"
 )
@@ -25,9 +27,17 @@ func main() {
 		log.Fatalf("db connect: %v", err)
 	}
 
-	repo := ord.NewPostgresRepository(db)
-	svc := ord.NewService(repo)
-	ctrl := ord.NewController(svc)
+	orderRepo := ord.NewPostgresRepository(db)
+	orderSvc := ord.NewService(orderRepo)
+	orderCtrl := ord.NewController(orderSvc)
+
+	itemRepo := item.NewPostgresRepository(db)
+	itemSvc := item.NewService(itemRepo)
+	itemCtrl := item.NewController(itemSvc)
+
+	basketRepo := basket.NewPostgresRepository(db)
+	basketSvc := basket.NewService(basketRepo)
+	basketCtrl := basket.NewController(basketSvc)
 
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
@@ -43,7 +53,7 @@ func main() {
 	}
 	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
-	r := router.New(ctrl, secret, authCtrl)
+	r := router.New(orderCtrl, itemCtrl, basketCtrl, secret, authCtrl)
 	log.Println("server listening on :8089")
 	log.Fatal(http.ListenAndServe(":8089", r))
 }

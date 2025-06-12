@@ -6,12 +6,14 @@ import (
 	"github.com/gorilla/mux"
 
 	"order/internal/auth"
+	"order/internal/basket"
+	"order/internal/item"
 	"order/internal/metrics"
 	ord "order/internal/order"
 )
 
 // New sets up application routes with middleware
-func New(orderCtrl *ord.Controller, secret []byte, authCtrl *auth.Controller) http.Handler {
+func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *basket.Controller, secret []byte, authCtrl *auth.Controller) http.Handler {
 	r := mux.NewRouter()
 
 	r.Use(metrics.Middleware)
@@ -25,6 +27,8 @@ func New(orderCtrl *ord.Controller, secret []byte, authCtrl *auth.Controller) ht
 	api := r.PathPrefix("").Subrouter()
 	api.Use(auth.Middleware(secret))
 	orderCtrl.RegisterRoutes(api)
+	itemCtrl.RegisterRoutes(api)
+	basketCtrl.RegisterRoutes(api)
 
 	return r
 }

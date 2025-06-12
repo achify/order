@@ -15,10 +15,14 @@ Start Postgres:
 docker-compose up -d
 ```
 
-Run database migration:
+Run database migrations:
 
 ```bash
 psql -h localhost -U postgres -d order -f internal/order/migrations/001_create_orders.sql
+psql -h localhost -U postgres -d order -f internal/category/migrations/001_create_categories.sql
+psql -h localhost -U postgres -d order -f internal/item/migrations/001_create_items.sql
+psql -h localhost -U postgres -d order -f internal/basket/migrations/001_create_baskets.sql
+psql -h localhost -U postgres -d order -f internal/basket/migrations/002_create_basket_items.sql
 ```
 
 Configure environment variables in a `.env` file (example values shown):
