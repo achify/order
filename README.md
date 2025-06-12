@@ -2,6 +2,8 @@
 
 This service implements a simple but scalable order API using Domain Driven Design (DDD). Orders are stored in PostgreSQL and authenticated via JWT.
 
+OpenAPI specifications for all services are located in the `docs` directory.
+
 ## Requirements
 
 - Go 1.24+
@@ -19,6 +21,9 @@ Run database migration:
 
 ```bash
 psql -h localhost -U postgres -d order -f internal/order/migrations/001_create_orders.sql
+
+# create users table
+psql -h localhost -U postgres -d order -f internal/user/migrations/001_create_users.sql
 ```
 
 Configure environment variables in a `.env` file (example values shown):
@@ -56,6 +61,8 @@ day automatically. Logs are written to `delivery.log`.
 
 API documentation is available in `docs/delivery-swagger.yaml`.
 
+The main order API is documented in `docs/order-swagger.yaml`.
+
 ### Payment Service
 
 Payments are recorded through a separate microservice. Run the migration and start the service:
@@ -66,6 +73,7 @@ go run ./cmd/payment
 ```
 
 See `docs/payment.md` for more details. Successful payments automatically set the related order status to `paid` and logs are written to `payment.log`.
+API documentation for the payment service is available in `docs/payment-swagger.yaml`.
 
 ## API
 
@@ -82,11 +90,11 @@ Validation errors return HTTP `422`. Missing or invalid tokens return `401`. Whe
 
 ### Authentication
 
-Obtain a JWT token using the static credentials `admin` / `password`:
+Obtain a JWT token using credentials stored in the `users` table (create users via `/users`):
 
 ```bash
 curl -X POST http://localhost:8080/auth/login \
-  -d '{"username":"admin","password":"password"}' \
+  -d '{"username":"<user>","password":"<pass>"}' \
   -H 'Content-Type: application/json'
 ```
 
