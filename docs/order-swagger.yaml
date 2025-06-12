@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Order Service API
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      summary: Obtain JWT token
+      responses:
+        '200': {description: OK}
+  /auth/refresh:
+    post:
+      summary: Refresh JWT token
+      responses:
+        '200': {description: OK}
+  /users:
+    post:
+      summary: Create user
+      responses:
+        '201': {description: Created}
+  /orders:
+    get:
+      summary: List orders
+      responses:
+        '200': {description: OK}
+    post:
+      summary: Create order
+      responses:
+        '201': {description: Created}
+  /orders/{id}:
+    get:
+      summary: Get order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: OK}
+    patch:
+      summary: Update order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: OK}
+    delete:
+      summary: Delete order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '204': {description: No content}
+  /metrics:
+    get:
+      summary: Service metrics
+      responses:
+        '200': {description: OK}
