@@ -30,6 +30,13 @@ func (c *Controller) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/baskets/{id}/items", c.listItems).Methods("GET")
 }
 
+// listBaskets godoc
+// @Summary List baskets
+// @Tags baskets
+// @Produce json
+// @Success 200 {array} basket.Basket
+// @Router /baskets [get]
+// @Security BearerAuth
 func (c *Controller) listBaskets(w http.ResponseWriter, r *http.Request) {
 	list, err := c.Service.List(r.Context())
 	if err != nil {
@@ -39,6 +46,14 @@ func (c *Controller) listBaskets(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, list)
 }
 
+// getBasket godoc
+// @Summary Get basket
+// @Tags baskets
+// @Produce json
+// @Param id path string true "Basket ID"
+// @Success 200 {object} basket.Basket
+// @Router /baskets/{id} [get]
+// @Security BearerAuth
 func (c *Controller) getBasket(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	b, err := c.Service.Get(r.Context(), id)
@@ -53,6 +68,15 @@ func (c *Controller) getBasket(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, b)
 }
 
+// createBasket godoc
+// @Summary Create basket
+// @Tags baskets
+// @Accept json
+// @Produce json
+// @Param basket body BasketCreateDTO true "New basket"
+// @Success 201 {object} basket.Basket
+// @Router /baskets [post]
+// @Security BearerAuth
 func (c *Controller) createBasket(w http.ResponseWriter, r *http.Request) {
 	var dto BasketCreateDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
@@ -71,6 +95,16 @@ func (c *Controller) createBasket(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, b)
 }
 
+// patchBasket godoc
+// @Summary Update basket
+// @Tags baskets
+// @Accept json
+// @Produce json
+// @Param id path string true "Basket ID"
+// @Param basket body BasketUpdateDTO true "Fields to update"
+// @Success 200 {object} basket.Basket
+// @Router /baskets/{id} [patch]
+// @Security BearerAuth
 func (c *Controller) patchBasket(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var dto BasketUpdateDTO
@@ -90,6 +124,13 @@ func (c *Controller) patchBasket(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, b)
 }
 
+// deleteBasket godoc
+// @Summary Delete basket
+// @Tags baskets
+// @Param id path string true "Basket ID"
+// @Success 204 {string} string "no content"
+// @Router /baskets/{id} [delete]
+// @Security BearerAuth
 func (c *Controller) deleteBasket(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if err := c.Service.Delete(r.Context(), id); err != nil {
@@ -99,6 +140,16 @@ func (c *Controller) deleteBasket(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// addItem godoc
+// @Summary Add item to basket
+// @Tags baskets
+// @Accept json
+// @Produce json
+// @Param id path string true "Basket ID"
+// @Param item body ItemDTO true "Item"
+// @Success 201 {string} string "created"
+// @Router /baskets/{id}/items [post]
+// @Security BearerAuth
 func (c *Controller) addItem(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var dto ItemDTO
@@ -117,6 +168,17 @@ func (c *Controller) addItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+// patchItem godoc
+// @Summary Update item in basket
+// @Tags baskets
+// @Accept json
+// @Produce json
+// @Param id path string true "Basket ID"
+// @Param item_id path string true "Item ID"
+// @Param item body ItemDTO true "Item"
+// @Success 200 {string} string "updated"
+// @Router /baskets/{id}/items/{item_id} [patch]
+// @Security BearerAuth
 func (c *Controller) patchItem(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	itemID := mux.Vars(r)["item_id"]
@@ -132,6 +194,14 @@ func (c *Controller) patchItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// deleteItem godoc
+// @Summary Delete item from basket
+// @Tags baskets
+// @Param id path string true "Basket ID"
+// @Param item_id path string true "Item ID"
+// @Success 204 {string} string "no content"
+// @Router /baskets/{id}/items/{item_id} [delete]
+// @Security BearerAuth
 func (c *Controller) deleteItem(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	itemID := mux.Vars(r)["item_id"]
@@ -142,6 +212,14 @@ func (c *Controller) deleteItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// listItems godoc
+// @Summary List basket items
+// @Tags baskets
+// @Produce json
+// @Param id path string true "Basket ID"
+// @Success 200 {array} basket.Item
+// @Router /baskets/{id}/items [get]
+// @Security BearerAuth
 func (c *Controller) listItems(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	items, err := c.Service.ListItems(r.Context(), id)

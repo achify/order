@@ -1,7 +1,9 @@
 package router
 
 import (
+	"github.com/swaggo/http-swagger/v2"
 	"net/http"
+	_ "order/internal/docs"
 
 	"github.com/gorilla/mux"
 
@@ -22,6 +24,7 @@ func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *baske
 	r.HandleFunc("/auth/login", authCtrl.Login).Methods("POST")
 	r.HandleFunc("/auth/refresh", authCtrl.Refresh).Methods("POST")
 	r.HandleFunc("/metrics", metrics.Handler)
+	r.PathPrefix("/docs/").Handler(httpSwagger.WrapHandler)
 
 	// protected routes
 	api := r.PathPrefix("").Subrouter()

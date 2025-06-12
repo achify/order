@@ -53,7 +53,22 @@ All endpoints require a valid JWT in the `Authorization: Bearer <token>` header.
 - `POST /orders` – create order
 - `PATCH /orders/{id}` – update order
 - `DELETE /orders/{id}` – delete order
+- `GET /items` – list items
+- `GET /items/{id}` – get item
+- `POST /items` – create item
+- `PATCH /items/{id}` – update item
+- `DELETE /items/{id}` – delete item
+- `GET /baskets` – list baskets
+- `GET /baskets/{id}` – get basket
+- `POST /baskets` – create basket
+- `PATCH /baskets/{id}` – update basket
+- `DELETE /baskets/{id}` – delete basket
+- `POST /baskets/{id}/items` – add item to basket
+- `PATCH /baskets/{id}/items/{item_id}` – update item in basket
+- `DELETE /baskets/{id}/items/{item_id}` – delete item from basket
+- `GET /baskets/{id}/items` – list basket items
 - `GET /metrics` – basic memory and RPS metrics
+Swagger UI is available at `http://localhost:8089/docs/index.html`.
 
 Validation errors return HTTP `422`. Missing or invalid tokens return `401`. When an order isn't found `404` is used.
 

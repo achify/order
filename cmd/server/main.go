@@ -1,3 +1,12 @@
+// Package main Order Service API
+// @title Order API
+// @version 1.0
+// @description API for managing orders, items, and baskets
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 package main
 
 import (
