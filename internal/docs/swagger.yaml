@@ -1,0 +1,563 @@
+basePath: /
+definitions:
+  internal_basket.Basket:
+    properties:
+      account_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      total_price:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  internal_basket.BasketCreateDTO:
+    properties:
+      account_id:
+        type: string
+    required:
+    - account_id
+    type: object
+  internal_basket.BasketUpdateDTO:
+    properties:
+      account_id:
+        type: string
+      total_price:
+        type: integer
+    type: object
+  internal_basket.Item:
+    properties:
+      basket_id:
+        type: string
+      item_id:
+        type: string
+      price_per_item:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  internal_basket.ItemDTO:
+    properties:
+      item_id:
+        type: string
+      price_per_item:
+        type: integer
+      quantity:
+        type: integer
+    required:
+    - item_id
+    - price_per_item
+    - quantity
+    type: object
+  internal_item.Item:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  internal_item.ItemCreateDTO:
+    properties:
+      category_id:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    required:
+    - category_id
+    - name
+    - price
+    type: object
+  internal_item.ItemUpdateDTO:
+    properties:
+      category_id:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  internal_order.Order:
+    properties:
+      account_id:
+        type: string
+      basket_id:
+        type: string
+      created_at:
+        type: string
+      delivery_id:
+        type: string
+      id:
+        type: string
+      receiver_id:
+        type: string
+      seller_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  internal_order.OrderCreateDTO:
+    properties:
+      account_id:
+        type: string
+      basket_id:
+        type: string
+      delivery_id:
+        type: string
+      receiver_id:
+        type: string
+      seller_id:
+        type: string
+    required:
+    - account_id
+    - basket_id
+    - delivery_id
+    - receiver_id
+    - seller_id
+    type: object
+  internal_order.OrderUpdateDTO:
+    properties:
+      account_id:
+        type: string
+      basket_id:
+        type: string
+      delivery_id:
+        type: string
+      receiver_id:
+        type: string
+      seller_id:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: API for managing orders, items, and baskets
+  title: Order API
+  version: "1.0"
+paths:
+  /baskets:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_basket.Basket'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List baskets
+      tags:
+      - baskets
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New basket
+        in: body
+        name: basket
+        required: true
+        schema:
+          $ref: '#/definitions/internal_basket.BasketCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_basket.Basket'
+      security:
+      - BearerAuth: []
+      summary: Create basket
+      tags:
+      - baskets
+  /baskets/{id}:
+    delete:
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: no content
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete basket
+      tags:
+      - baskets
+    get:
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_basket.Basket'
+      security:
+      - BearerAuth: []
+      summary: Get basket
+      tags:
+      - baskets
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: basket
+        required: true
+        schema:
+          $ref: '#/definitions/internal_basket.BasketUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_basket.Basket'
+      security:
+      - BearerAuth: []
+      summary: Update basket
+      tags:
+      - baskets
+  /baskets/{id}/items:
+    get:
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_basket.Item'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List basket items
+      tags:
+      - baskets
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/internal_basket.ItemDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: created
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Add item to basket
+      tags:
+      - baskets
+  /baskets/{id}/items/{item_id}:
+    delete:
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: no content
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete item from basket
+      tags:
+      - baskets
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Basket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: string
+      - description: Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/internal_basket.ItemDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: updated
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update item in basket
+      tags:
+      - baskets
+  /items:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_item.Item'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List items
+      tags:
+      - items
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/internal_item.ItemCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_item.Item'
+      security:
+      - BearerAuth: []
+      summary: Create item
+      tags:
+      - items
+  /items/{id}:
+    delete:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: no content
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete item
+      tags:
+      - items
+    get:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_item.Item'
+      security:
+      - BearerAuth: []
+      summary: Get item
+      tags:
+      - items
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/internal_item.ItemUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_item.Item'
+      security:
+      - BearerAuth: []
+      summary: Update item
+      tags:
+      - items
+  /orders:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_order.Order'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New order
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/internal_order.OrderCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_order.Order'
+      security:
+      - BearerAuth: []
+      summary: Create order
+      tags:
+      - orders
+  /orders/{id}:
+    delete:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: no content
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete order
+      tags:
+      - orders
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_order.Order'
+      security:
+      - BearerAuth: []
+      summary: Get order
+      tags:
+      - orders
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/internal_order.OrderUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_order.Order'
+      security:
+      - BearerAuth: []
+      summary: Update order
+      tags:
+      - orders
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

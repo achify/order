@@ -1,3 +1,12 @@
+// Package main Order Service API
+// @title Order API
+// @version 1.0
+// @description API for managing orders, items, and baskets
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 package main
 
 import (
@@ -10,6 +19,8 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"order/internal/auth"
+	"order/internal/basket"
+	"order/internal/item"
 	ord "order/internal/order"
 	"order/internal/router"
 	usr "order/internal/user"
@@ -26,9 +37,21 @@ func main() {
 		log.Fatalf("db connect: %v", err)
 	}
 
-	repo := ord.NewPostgresRepository(db)
-	svc := ord.NewService(repo)
-	ctrl := ord.NewController(svc)
+	orderRepo := ord.NewPostgresRepository(db)
+	orderSvc := ord.NewService(orderRepo)
+	orderCtrl := ord.NewController(orderSvc)
+
+	itemRepo := item.NewPostgresRepository(db)
+	itemSvc := item.NewService(itemRepo)
+	itemCtrl := item.NewController(itemSvc)
+
+	basketRepo := basket.NewPostgresRepository(db)
+	basketSvc := basket.NewService(basketRepo)
+	basketCtrl := basket.NewController(basketSvc)
+
+	userRepo := usr.NewPostgresRepository(db)
+	userSvc := usr.NewService(userRepo)
+	userCtrl := usr.NewController(userSvc)
 
 	userRepo := usr.NewPostgresRepository(db)
 	userSvc := usr.NewService(userRepo)
@@ -48,7 +71,7 @@ func main() {
 	}
 	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
-	r := router.New(ctrl, secret, authCtrl, userCtrl)
+	r := router.New(orderCtrl, itemCtrl, basketCtrl, secret, authCtrl, userCtrl)
 	log.Println("server listening on :8089")
 	log.Fatal(http.ListenAndServe(":8089", r))
 }
