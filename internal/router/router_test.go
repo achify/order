@@ -59,6 +59,15 @@ func (m *memUserRepo) GetByUsername(_ context.Context, _ string) (*usr.User, err
 }
 func (m *memUserRepo) Update(_ context.Context, _ *usr.User) error { return nil }
 
+// memUserRepo is a simple in-memory user repository.
+type memUserRepo struct{ user *usr.User }
+
+func (m *memUserRepo) Create(_ context.Context, u *usr.User) error { m.user = u; return nil }
+func (m *memUserRepo) GetByUsername(_ context.Context, _ string) (*usr.User, error) {
+	return m.user, nil
+}
+func (m *memUserRepo) Update(_ context.Context, _ *usr.User) error { return nil }
+
 func TestCreateOrderStatusCode(t *testing.T) {
 	repo := newMockRepo()
 	svc := ord.NewService(repo)

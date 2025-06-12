@@ -25,7 +25,6 @@ psql -h localhost -U postgres -d order -f internal/category/migrations/001_creat
 psql -h localhost -U postgres -d order -f internal/item/migrations/001_create_items.sql
 psql -h localhost -U postgres -d order -f internal/basket/migrations/001_create_baskets.sql
 psql -h localhost -U postgres -d order -f internal/basket/migrations/002_create_basket_items.sql
-# create users table
 psql -h localhost -U postgres -d order -f internal/user/migrations/001_create_users.sql
 ```
 

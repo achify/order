@@ -53,6 +53,10 @@ func main() {
 	userSvc := usr.NewService(userRepo)
 	userCtrl := usr.NewController(userSvc)
 
+	userRepo := usr.NewPostgresRepository(db)
+	userSvc := usr.NewService(userRepo)
+	userCtrl := usr.NewController(userSvc)
+
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
 		secret = []byte("secret")
