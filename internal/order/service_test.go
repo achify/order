@@ -21,9 +21,9 @@ func (m *mockRepo) GetByID(ctx context.Context, id string) (*Order, error) {
 	}
 	return nil, nil
 }
-func (m *mockRepo) List(ctx context.Context) ([]Order, error)   { return nil, nil }
-func (m *mockRepo) Update(ctx context.Context, o *Order) error  { m.store[o.ID] = o; return nil }
-func (m *mockRepo) Delete(ctx context.Context, id string) error { delete(m.store, id); return nil }
+func (m *mockRepo) List(ctx context.Context, deliveryID string) ([]Order, error) { return nil, nil }
+func (m *mockRepo) Update(ctx context.Context, o *Order) error                   { m.store[o.ID] = o; return nil }
+func (m *mockRepo) Delete(ctx context.Context, id string) error                  { delete(m.store, id); return nil }
 
 func TestServiceCreateAndGet(t *testing.T) {
 	repo := newMock()
@@ -40,5 +40,8 @@ func TestServiceCreateAndGet(t *testing.T) {
 	}
 	if got.ID != o.ID {
 		t.Fatalf("want %s got %s", o.ID, got.ID)
+	}
+	if got.Status != StatusNew {
+		t.Fatalf("want status %s got %s", StatusNew, got.Status)
 	}
 }

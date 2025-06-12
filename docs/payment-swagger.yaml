@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Payment Service API
+  version: 1.0.0
+paths:
+  /payments:
+    post:
+      summary: Register payment
+      responses:
+        '201': {description: Created}
+  /payments/{id}:
+    get:
+      summary: Get payment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: OK}

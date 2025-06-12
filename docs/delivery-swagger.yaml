@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: Delivery Service API
+  version: 1.0.0
+paths:
+  /deliveries:
+    get:
+      summary: List deliveries
+      responses:
+        '200': {description: OK}
+    post:
+      summary: Create delivery
+      responses:
+        '201': {description: Created}
+  /deliveries/{id}:
+    get:
+      summary: Get delivery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: OK}
+    patch:
+      summary: Update delivery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: OK}
+    delete:
+      summary: Delete delivery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '204': {description: No content}
+  /locations/{provider}:
+    get:
+      summary: List provider locations
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: OK}

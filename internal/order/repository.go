@@ -12,7 +12,8 @@ import (
 type Repository interface {
 	Create(ctx context.Context, o *Order) error
 	GetByID(ctx context.Context, id string) (*Order, error)
-	List(ctx context.Context) ([]Order, error)
+	// List returns orders optionally filtered by delivery id
+	List(ctx context.Context, deliveryID string) ([]Order, error)
 	Update(ctx context.Context, o *Order) error
 	Delete(ctx context.Context, id string) error
 }
@@ -20,18 +21,20 @@ type Repository interface {
 // PostgresRepository implements Repository using PostgreSQL
 
 const createQuery = `INSERT INTO orders
-    (id, created_at, updated_at, receiver_id, account_id, seller_id, delivery_id, basket_id)
-    VALUES (:id, :created_at, :updated_at, :receiver_id, :account_id, :seller_id, :delivery_id, :basket_id)`
+    (id, created_at, updated_at, receiver_id, account_id, seller_id, delivery_id, basket_id, status)
+    VALUES (:id, :created_at, :updated_at, :receiver_id, :account_id, :seller_id, :delivery_id, :basket_id, :status)`
 
 const getQuery = `SELECT * FROM orders WHERE id=$1`
 const listQuery = `SELECT * FROM orders`
+const listByDeliveryQuery = `SELECT * FROM orders WHERE delivery_id=$1`
 const updateQuery = `UPDATE orders SET
     updated_at=:updated_at,
     receiver_id=:receiver_id,
     account_id=:account_id,
     seller_id=:seller_id,
     delivery_id=:delivery_id,
-    basket_id=:basket_id
+    basket_id=:basket_id,
+    status=:status
     WHERE id=:id`
 const deleteQuery = `DELETE FROM orders WHERE id=$1`
 
@@ -57,9 +60,15 @@ func (r *PostgresRepository) GetByID(ctx context.Context, id string) (*Order, er
 	return &o, nil
 }
 
-func (r *PostgresRepository) List(ctx context.Context) ([]Order, error) {
+func (r *PostgresRepository) List(ctx context.Context, deliveryID string) ([]Order, error) {
 	var list []Order
-	if err := r.DB.SelectContext(ctx, &list, listQuery); err != nil {
+	query := listQuery
+	args := []interface{}{}
+	if deliveryID != "" {
+		query = listByDeliveryQuery
+		args = append(args, deliveryID)
+	}
+	if err := r.DB.SelectContext(ctx, &list, query, args...); err != nil {
 		return nil, err
 	}
 	return list, nil

@@ -35,12 +35,19 @@ func (c *Controller) RegisterRoutes(r *mux.Router) {
 // @Router /orders [get]
 // @Security BearerAuth
 func (c *Controller) listOrders(w http.ResponseWriter, r *http.Request) {
-	list, err := c.Service.List(r.Context())
+	deliveryID := r.URL.Query().Get("delivery_id")
+	list, err := c.Service.List(r.Context(), deliveryID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	respondJSON(w, http.StatusOK, list)
+	var filtered []Order
+	for i := range list {
+		if canView(r.Context(), &list[i]) {
+			filtered = append(filtered, list[i])
+		}
+	}
+	respondJSON(w, http.StatusOK, filtered)
 }
 
 // getOrder godoc
@@ -60,6 +67,10 @@ func (c *Controller) getOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	if o == nil {
 		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if !canView(r.Context(), o) {
+		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
 	respondJSON(w, http.StatusOK, o)
@@ -109,7 +120,20 @@ func (c *Controller) patchOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	o, err := c.Service.Update(r.Context(), id, dto)
+	o, err := c.Service.Get(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if o == nil {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if !canEdit(r.Context(), o) {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	o, err = c.Service.Update(r.Context(), id, dto)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,6 +154,19 @@ func (c *Controller) patchOrder(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 func (c *Controller) deleteOrder(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
+	o, err := c.Service.Get(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if o == nil {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if !canEdit(r.Context(), o) {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
 	if err := c.Service.Delete(r.Context(), id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

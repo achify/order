@@ -3,14 +3,19 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+
+	"order/internal/user"
 )
 
 // Controller exposes auth handlers to obtain and refresh tokens.
 type Controller struct {
 	Service *Service
+	UserSvc *user.Service
 }
 
-func NewController(s *Service) *Controller { return &Controller{Service: s} }
+func NewController(s *Service, u *user.Service) *Controller {
+	return &Controller{Service: s, UserSvc: u}
+}
 
 // Login authenticates static credentials and returns JWT tokens.
 func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
@@ -22,11 +27,16 @@ func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if creds.Username != "admin" || creds.Password != "password" {
+	u, err := c.UserSvc.Authenticate(r.Context(), creds.Username, creds.Password)
+	if err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
-	token, refresh, err := c.Service.GenerateToken(creds.Username)
+	roles := make([]string, len(u.Roles))
+	for i, r := range u.Roles {
+		roles[i] = string(r)
+	}
+	token, refresh, err := c.Service.GenerateToken(u.ID, roles)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

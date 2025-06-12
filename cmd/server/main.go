@@ -23,6 +23,7 @@ import (
 	"order/internal/item"
 	ord "order/internal/order"
 	"order/internal/router"
+	usr "order/internal/user"
 )
 
 func main() {
@@ -48,12 +49,16 @@ func main() {
 	basketSvc := basket.NewService(basketRepo)
 	basketCtrl := basket.NewController(basketSvc)
 
+	userRepo := usr.NewPostgresRepository(db)
+	userSvc := usr.NewService(userRepo)
+	userCtrl := usr.NewController(userSvc)
+
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
 		secret = []byte("secret")
 	}
 	authSvc := auth.NewService(secret)
-	authCtrl := auth.NewController(authSvc)
+	authCtrl := auth.NewController(authSvc, userSvc)
 
 	// log to file
 	f, err := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -62,7 +67,7 @@ func main() {
 	}
 	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
-	r := router.New(orderCtrl, itemCtrl, basketCtrl, secret, authCtrl)
+	r := router.New(orderCtrl, itemCtrl, basketCtrl, secret, authCtrl, userCtrl)
 	log.Println("server listening on :8089")
 	log.Fatal(http.ListenAndServe(":8089", r))
 }
