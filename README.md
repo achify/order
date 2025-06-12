@@ -2,6 +2,8 @@
 
 This service implements a simple but scalable order API using Domain Driven Design (DDD). Orders are stored in PostgreSQL and authenticated via JWT.
 
+OpenAPI specifications for all services are located in the `docs` directory.
+
 ## Requirements
 
 - Go 1.24+
@@ -59,6 +61,8 @@ day automatically. Logs are written to `delivery.log`.
 
 API documentation is available in `docs/delivery-swagger.yaml`.
 
+The main order API is documented in `docs/order-swagger.yaml`.
+
 ### Payment Service
 
 Payments are recorded through a separate microservice. Run the migration and start the service:
@@ -69,6 +73,7 @@ go run ./cmd/payment
 ```
 
 See `docs/payment.md` for more details. Successful payments automatically set the related order status to `paid` and logs are written to `payment.log`.
+API documentation for the payment service is available in `docs/payment-swagger.yaml`.
 
 ## API
 
