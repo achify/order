@@ -60,3 +60,8 @@ paths:
       summary: Service metrics
       responses:
         '200': {description: OK}
+  /allowed-endpoints:
+    get:
+      summary: List allowed endpoints for current user
+      responses:
+        '200': {description: OK}

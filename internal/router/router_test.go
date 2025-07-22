@@ -11,6 +11,7 @@ import (
 	"order/internal/basket"
 	"order/internal/item"
 	ord "order/internal/order"
+	"order/internal/rbac"
 	usr "order/internal/user"
 )
 
@@ -59,15 +60,6 @@ func (m *memUserRepo) GetByUsername(_ context.Context, _ string) (*usr.User, err
 }
 func (m *memUserRepo) Update(_ context.Context, _ *usr.User) error { return nil }
 
-// memUserRepo is a simple in-memory user repository.
-type memUserRepo struct{ user *usr.User }
-
-func (m *memUserRepo) Create(_ context.Context, u *usr.User) error { m.user = u; return nil }
-func (m *memUserRepo) GetByUsername(_ context.Context, _ string) (*usr.User, error) {
-	return m.user, nil
-}
-func (m *memUserRepo) Update(_ context.Context, _ *usr.User) error { return nil }
-
 func TestCreateOrderStatusCode(t *testing.T) {
 	repo := newMockRepo()
 	svc := ord.NewService(repo)
@@ -84,7 +76,7 @@ func TestCreateOrderStatusCode(t *testing.T) {
 	authCtrl := auth.NewController(authSvc, userSvc)
 	userCtrl := usr.NewController(userSvc)
 
-	r := New(ctrl, itemCtrl, basketCtrl, secret, authCtrl, userCtrl)
+	r := New(ctrl, itemCtrl, basketCtrl, secret, authCtrl, userCtrl, rbac.NewController())
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
