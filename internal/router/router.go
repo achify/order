@@ -12,11 +12,12 @@ import (
 	"order/internal/item"
 	"order/internal/metrics"
 	ord "order/internal/order"
+	"order/internal/rbac"
 	usr "order/internal/user"
 )
 
 // New sets up application routes with middleware
-func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *basket.Controller, secret []byte, authCtrl *auth.Controller, userCtrl *usr.Controller) http.Handler {
+func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *basket.Controller, secret []byte, authCtrl *auth.Controller, userCtrl *usr.Controller, rbacCtrl *rbac.Controller) http.Handler {
 	r := mux.NewRouter()
 
 	r.Use(metrics.Middleware)
@@ -34,6 +35,7 @@ func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *baske
 	itemCtrl.RegisterRoutes(api)
 	basketCtrl.RegisterRoutes(api)
 	api.HandleFunc("/users", userCtrl.CreateUser).Methods("POST")
+	api.HandleFunc("/allowed-endpoints", rbacCtrl.AllowedEndpoints).Methods("GET")
 
 	return r
 }
