@@ -1,22 +1,24 @@
 package router
 
 import (
-	"github.com/swaggo/http-swagger/v2"
 	"net/http"
-	_ "order/internal/docs"
 
 	"github.com/gorilla/mux"
+	"github.com/swaggo/http-swagger/v2"
+	_ "order/internal/docs"
 
 	"order/internal/auth"
 	"order/internal/basket"
 	"order/internal/item"
 	"order/internal/metrics"
 	ord "order/internal/order"
+	"order/internal/payout"
+	"order/internal/transfer"
 	usr "order/internal/user"
 )
 
 // New sets up application routes with middleware
-func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *basket.Controller, secret []byte, authCtrl *auth.Controller, userCtrl *usr.Controller) http.Handler {
+func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *basket.Controller, secret []byte, authCtrl *auth.Controller, userCtrl *usr.Controller, transferCtrl *transfer.Controller, payoutCtrl *payout.Controller) http.Handler {
 	r := mux.NewRouter()
 
 	r.Use(metrics.Middleware)
@@ -33,6 +35,8 @@ func New(orderCtrl *ord.Controller, itemCtrl *item.Controller, basketCtrl *baske
 	orderCtrl.RegisterRoutes(api)
 	itemCtrl.RegisterRoutes(api)
 	basketCtrl.RegisterRoutes(api)
+	transferCtrl.RegisterRoutes(api)
+	payoutCtrl.RegisterRoutes(api)
 	api.HandleFunc("/users", userCtrl.CreateUser).Methods("POST")
 
 	return r

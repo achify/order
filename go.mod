@@ -13,6 +13,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	github.com/swaggo/swag v1.16.4
+	golang.org/x/sync v0.11.0
 )
 
 require (
