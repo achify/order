@@ -22,7 +22,9 @@ import (
 	"order/internal/basket"
 	"order/internal/item"
 	ord "order/internal/order"
+	"order/internal/payout"
 	"order/internal/router"
+	"order/internal/transfer"
 	usr "order/internal/user"
 )
 
@@ -53,9 +55,15 @@ func main() {
 	userSvc := usr.NewService(userRepo)
 	userCtrl := usr.NewController(userSvc)
 
-	userRepo := usr.NewPostgresRepository(db)
-	userSvc := usr.NewService(userRepo)
-	userCtrl := usr.NewController(userSvc)
+	pricingRepo := transfer.NewInMemoryRepository()
+	pricingRepo.SetRate("GBP", "NGN", 210)
+	pricingRepo.SetFee("GBP", "NGN", 1.99)
+	transferSvc := transfer.NewService(pricingRepo)
+	transferCtrl := transfer.NewController(transferSvc)
+
+	payoutRepo := payout.NewInMemoryRepository()
+	payoutSvc := payout.NewService(payoutRepo, pricingRepo)
+	payoutCtrl := payout.NewController(payoutSvc)
 
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {
@@ -71,7 +79,7 @@ func main() {
 	}
 	log.SetOutput(io.MultiWriter(os.Stdout, f))
 
-	r := router.New(orderCtrl, itemCtrl, basketCtrl, secret, authCtrl, userCtrl)
+	r := router.New(orderCtrl, itemCtrl, basketCtrl, secret, authCtrl, userCtrl, transferCtrl, payoutCtrl)
 	log.Println("server listening on :8089")
 	log.Fatal(http.ListenAndServe(":8089", r))
 }
